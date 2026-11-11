@@ -34,3 +34,48 @@ Running the Server
 2. In VS Code or CMD (once you've cd to the correct folder), run 
    : python api.py
 3. The server is now running and listening for connections
+
+Sending a POST request
+1. From the CMD
+   : curl -X POST http://127.0.0.1:5000/table -H "Content-Type: application/json" -d "{\"column1\": \"value1\", \"column2\": \"value2\"}"
+2. From the website
+    fetch("http://127.0.0.1:5000/table", {
+    method: "POST",
+    headers: {
+        "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+        column1: "value1",
+        column2: "value2"
+    })
+})
+.then(response => response.json())
+.then(data => console.log(data))
+.catch(error => console.error(error));
+
+Sending a DELETE request
+1. From the CMD
+	: curl -X DELETE http://127.0.0.1:5000/table -H "Content-Type: application/json" -d "{\"column1\": \"value1\", \"column2\": \"value2\"}"
+2. From the website
+fetch("http://127.0.0.1:5000/table", {
+    method: "DELETE",
+    headers: {
+        "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+        column1: "value1",
+        column2: "value2"
+    })
+})
+.then(response => response.json())
+.then(data => console.log(data))
+.catch(error => console.error(error));
+
+Sending a Get request
+1. From the CMD
+   : curl -X GET "http://127.0.0.1:5000/table?column1=value1&column2=value2"
+2. From the website
+fetch("http://127.0.0.1:5000/table?column1=value1&column2=value2", {
+    method: "GET"
+});
+

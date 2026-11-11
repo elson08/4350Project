@@ -180,3 +180,78 @@ def insert_record(table, json):
         return 1
     finally:
         connect.close()
+
+def delete_record(table, json):
+
+    # Verify some input
+    if not table or json is None:
+        print("Missing input")
+        return 1
+
+    # Create connection to db
+    connect = get_connection()
+
+    # Check the table exists
+    cursor = connect.execute(
+        "SELECT name FROM sqlite_master WHERE type='table' AND name=?",
+        (table,)
+    )
+
+    if cursor.fetchone() is None:
+        print("Table not found")
+        connect.close()
+        return 1
+
+    # Check the JSON is a dict object
+    if not isinstance(json, dict) or not json:
+        print("JSON object must be a dictionary")
+        connect.close()
+        return 1
+
+    # Get the input columns and values
+    input_keys = []
+    input_values = []
+
+    for key in json.keys():
+        input_keys.append(key)
+
+    for value in json.values():
+        input_values.append(value)
+
+    # Get the table columns
+    table_keys = []
+    cursor = connect.execute(f'PRAGMA table_info("{table}")')
+    columns = cursor.fetchall()
+
+    for column in columns:
+        table_keys.append(column[1])
+
+    # Verify input keys are present in table
+    for key in input_keys:
+        if key not in table_keys:
+            print(f"Key not found in the table: {key}")
+            connect.close()
+            return 1
+
+    # Create SQL conditions
+    conditions = []
+    for key in input_keys:
+        conditions.append(f'"{key}" = ?')
+
+    # Create the SQL
+    sql = f'DELETE FROM "{table}" WHERE {" AND ".join(conditions)}'
+
+    try:
+        cursor = connect.execute(sql, input_values)
+        connect.commit()
+        return 0
+    except sqlite3.IntegrityError as error:
+        print(f"Database error: {error}")
+        return 1
+    except sqlite3.Error as error:
+        print(f"Database error: {error}")
+        return 1
+    finally:
+        connect.close()
+
+        
