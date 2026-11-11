@@ -25,3 +25,12 @@ Creating a table
 8. When done with all rows, press the green check mark to save
 9. Press OK
 10. Push to GitHub
+
+Running the Server
+1. Install Flask onto your computer
+   : Either from VS Code terminal or cmd run this command
+   : python -m pip install flask
+   : Once that is done, copy and paste the upgrade command it gives you and run that
+2. In VS Code or CMD (once you've cd to the correct folder), run 
+   : python api.py
+3. The server is now running and listening for connections
