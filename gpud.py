@@ -5,6 +5,7 @@ def get_connection():
     # Connect to the database
     connect = sqlite3.connect("AutoParts.db")
     connect.row_factory = sqlite3.Row
+    connect.execute("PRAGMA foreign_keys = ON ")
     return connect
 
 def get_record(table, key=None, args=None):
@@ -99,3 +100,83 @@ def get_record(table, key=None, args=None):
     connect.close()
 
     return result
+
+def insert_record(table, json):
+    connect = get_connection()
+
+    # Check the table exists
+    cursor = connect.execute(
+        "SELECT name FROM sqlite_master WHERE type='table' AND name=?",
+        (table,)
+    )
+
+    # Check the JSON is a dict object
+    if not isinstance(json, dict) or not json:
+        print("JSON object must be a dictionary")
+        connect.close()
+        return 1
+
+    if cursor.fetchone() is None:
+        print("Table not found")
+        connect.close()
+        return 1
+
+    # Verify key names
+    input_keys = []
+    for key in json:
+        input_keys.append(key)
+
+    #Check the primary key exists
+    cursor = connect.execute(f'PRAGMA table_info("{table}")')
+    columns = cursor.fetchall()
+        
+    # Get required keys
+    req_keys = [] 
+    all_keys = []
+    for column in columns:
+            if column[3] == 1 and column[4] is None:
+                req_keys.append(column[1])
+            if column[5] > 0:
+                req_keys.append(column[1])
+            all_keys.append(column[1])
+
+    # Confirm input format and keys are correct
+    # Dont need to check for duplicate keys as python already does that
+    # Confirm min number of keys is found
+
+    # Check required keys are present
+    for key in req_keys:
+        if key not in input_keys:
+            print(f"Missing a required key: {key}")
+            connect.close()
+            return 1
+
+    # Check all input keys are valid
+    for key in input_keys:
+        if key not in all_keys:
+            print(f"Invalid key: {key}")
+            connect.close()
+            return 1
+
+    # Get the input values for the sql
+    # I already got the keys above
+    input_values = []
+    for value in json.values():
+        input_values.append(value)
+
+    # Create the SQL
+    sql = f'INSERT INTO "{table}" ({", ".join(input_keys)}) VALUES({", ".join("?" for _ in input_values)})'
+
+    # Run the SQL
+    try:
+        connect.execute(sql, input_values)
+        connect.commit()
+        return 0
+    except sqlite3.IntegrityError as error:
+        print(f"Database constraint error: {error}")
+        return 1
+    except sqlite3.Error as error:
+        print(f"Database error: {error}")
+        return 1
+    finally:
+        connect.close()
