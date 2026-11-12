@@ -7,7 +7,7 @@ app = Flask(__name__)
 # Get the incoming call and sort it
 # This first line handles requests where no specific record ID was given
 # Largely for multi record requests
-@app.route("/<table>", defaults={"key": None}, methods=["GET", "POST", "DELETE"])
+@app.route("/<table>", defaults={"key": None}, methods=["GET", "POST", "DELETE", "PATCH"])
 
 # This second line handles requests where an ID was given
 # Largely for single record requests 
@@ -38,6 +38,13 @@ def route_request(table, key):
     if request.method == "DELETE":
         result = gpud.delete_record(
             table, 
+            request.get_json()
+        )
+
+    # If there was an update request
+    if request.method == "PATCH":
+        result = gpud.update_record(
+            table,
             request.get_json()
         )
 

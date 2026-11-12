@@ -254,4 +254,99 @@ def delete_record(table, json):
     finally:
         connect.close()
 
-        
+def update_record(table, json):
+
+    # Verify some input
+        if not table or json is None:
+            print("Missing input")
+            return 1
+    
+        # Create connection to db
+        connect = get_connection()
+    
+        # Check the table exists
+        cursor = connect.execute(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name=?",
+            (table,)
+        )
+    
+        if cursor.fetchone() is None:
+            print("Table not found")
+            connect.close()
+            return 1
+    
+        # Check the JSON is a dict object
+        if not isinstance(json, dict) or not json:
+            print("JSON object must be a dictionary")
+            connect.close()
+            return 1
+    
+        # Get the input columns and values
+        condition_keys = []
+        update_keys = []
+        condition_values = []
+        update_values = []
+    
+        for key in json["conditions"].keys():
+            condition_keys.append(key)
+
+        for key in json["updates"].keys():
+            update_keys.append(key)
+
+        for value in json["conditions"].values():
+            condition_values.append(value)
+
+        for value in json["updates"].values():
+                    update_values.append(value)
+    
+        # Get the table columns
+        table_keys = []
+        cursor = connect.execute(f'PRAGMA table_info("{table}")')
+        columns = cursor.fetchall()
+    
+        for column in columns:
+            table_keys.append(column[1])
+    
+        # Verify condition keys are present in table
+        for key in condition_keys:
+            if key not in table_keys:
+                print(f" Condition key not found in the table: {key}")
+                connect.close()
+                return 1
+
+        # Verify update keys are present in table
+        for key in update_keys:
+            if key not in table_keys:
+                print(f"Update key not found in the table: {key}")
+                connect.close()
+                return 1
+
+        # Create the SET
+        updates = []
+
+        for key in update_keys:
+            updates.append(f'"{key}" = ?')
+
+        # Create the WHERE
+        conditions = []
+
+        for key in condition_keys:
+            conditions.append(f'"{key}" = ?')
+
+        # Create the SQL
+        sql = f'UPDATE "{table}" SET {", ".join(updates)} WHERE {" AND".join(conditions)}'
+        parameters = update_values + condition_values
+
+        try:
+            cursor = connect.execute(sql, parameters)
+            connect.commit()
+            print("Updated Record")
+            return 0
+        except sqlite3.IntegrityError as error:
+            print(f"Database error: {error}")
+            return 1
+        except sqlite3.Error as error:
+            print(f"Database error: {error}")
+            return 1
+        finally:
+            connect.close()
