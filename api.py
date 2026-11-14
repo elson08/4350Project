@@ -4,6 +4,11 @@ import gpud
 # Name the flask app
 app = Flask(__name__)
 
+# homepage routing
+@app.route("/")
+def home():
+    return jsonify({"message": "Auto Store API is running"})
+
 # Get the incoming call and sort it
 # This first line handles requests where no specific record ID was given
 # Largely for multi record requests
@@ -12,6 +17,7 @@ app = Flask(__name__)
 # This second line handles requests where an ID was given
 # Largely for single record requests 
 @app.route("/<table>/<key>", methods=["GET"])
+
 
 # Filtering and conditions and be found in request.args and method under request.method
 def route_request(table, key):
