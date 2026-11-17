@@ -3,10 +3,14 @@ const API_BASE = "http://127.0.0.1:5000";
 
 // GET request
 export async function getData(table) {
-  const response = await fetch(`${API_BASE}/${table}`);
+  const params = new URLSearchParams(data);
 
-  if (!response.ok) {
-    throw new Error(`GET failed: ${response.status}`);
+  const response = await fetch(`${API_BASE}/${table}?${params}`, {
+    method: "GET"
+  });
+
+  if(!response.ok) {
+    throw new Error('GET failed: ${response.status}');
   }
 
   return await response.json();
@@ -49,7 +53,11 @@ export async function updateData(table, data) {
 // DELETE request
 export async function deleteData(table) {
   const response = await fetch(`${API_BASE}/${table}`, {
-    method: "DELETE"
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(data)
   });
 
   if (!response.ok) {
