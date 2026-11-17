@@ -153,12 +153,13 @@ def insert_record(table, json):
         input_values.append(value)
 
     # Create the SQL
-    sql = f'SELECT * FROM "{table}" ({", ".join(input_keys)}) VALUES({", ".join("?" for _ in input_values)})'
+    sql = f'INSERT INTO "{table}" ({", ".join(input_keys)}) VALUES({", ".join("?" for _ in input_values)})'
 
     # Run the SQL
     try:
         result = connect.execute(sql, input_values)
-        return result
+        connect.commit()
+        return 0
     except sqlite3.IntegrityError as error:
         print(f"Database constraint error: {error}")
         return 1

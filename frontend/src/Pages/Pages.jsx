@@ -124,9 +124,11 @@ export function Login({ selectedStore }) {
             return;
         }
 
+        console.log("Store selected")
         setLoading(true);
 
         try {
+            console.log("Getting account")
             const accounts = await getRecords("userAccount", {
                 username: email.trim()
             });
@@ -134,6 +136,8 @@ export function Login({ selectedStore }) {
             if (!accounts || accounts.length === 0) {
                 throw new Error("No account was found with that email.");
             }
+
+            console.log("Account found")
 
             const account = accounts[0];
 
@@ -147,14 +151,17 @@ export function Login({ selectedStore }) {
                 password,
                 account.passwordHash
             );
+            console.log("Password matches")
 
             if (!passwordMatches) {
+                console.log("Incorrect email or password")
                 throw new Error("Incorrect email or password.");
             }
 
+            console.log("Getting customer account")
             if (accountType === "customer") {
                 const customers = await getRecords("customer", {
-                    userID: account.userID
+                    customerID: account.customerID
                 });
 
                 if (!customers || customers.length === 0) {
@@ -163,10 +170,13 @@ export function Login({ selectedStore }) {
                     );
                 }
 
+                console.log("Found customer account")
+
                 navigate("/customer/parts");
             } else {
+                console.log("Getting employee account")
                 const employees = await getRecords("employee", {
-                    userID: account.userID
+                    employeeID: account.employeeID
                 });
 
                 if (!employees || employees.length === 0) {
@@ -174,6 +184,7 @@ export function Login({ selectedStore }) {
                         "Your account exists, but its employee profile could not be found."
                     );
                 }
+                console.log("Found employee account") 
 
                 const employee = employees[0];
 
@@ -193,7 +204,7 @@ export function Login({ selectedStore }) {
     }
 
     function handleRegister() {
-        if (accountType === "Customer") {
+        if (accountType === "customer") {
             navigate("/register/customer");
         } else {
             navigate("/register/employee");
@@ -309,10 +320,11 @@ export function CustomerRegister() {
     async function handleRegister(event) {
         event.preventDefault();
 
-        console.log("REGISTER FUNCTION CALLED");
+        console.log("CUSTOMER REGISTER CALLED");
 
         setError("");
 
+        console.log("Validating")
         const validationError = validateRegistration(
             name,
             email,
@@ -325,6 +337,7 @@ export function CustomerRegister() {
             setError(validationError);
             return;
         }
+        console.log("Validation Complete")
 
         setLoading(true);
 
@@ -335,16 +348,18 @@ export function CustomerRegister() {
 
             console.log("Password hash completed");
 
-            console.log("Attempting to register account:", email);
-            await insertRecord("userAccount", {
-                username: email.trim(),
-                passwordHash: passwordHash,
-                accountRole: "customer"
+            // Create customer
+            console.log("Attempting to create customer profile");
+            await insertRecord("customer", {
+                name: name.trim(),
+                address: address.trim(),
+                phone: phone.trim()
             });
-            console.log("Account insertion completed");
-            // Retrieve the newly created account so we can get its userID.
-            const accounts = await getRecords("userAccount", {
-                username: email.trim()
+            // End
+
+            // Retrieve the newly created account so we can get its customerID
+            const accounts = await getRecords("customer", {
+                name: name.trim()
             });
 
             if (!accounts || accounts.length === 0) {
@@ -354,15 +369,18 @@ export function CustomerRegister() {
             }
 
             const account = accounts[0];
+            // End
 
-            console.log("Attempting to create customer profile");
-            await insertRecord("customer", {
-                name: name.trim(),
-                address: address.trim(),
-                phone: phone.trim(),
-                email: email.trim(),
-                userID: account.userID
+            {/* Create userAccount */}
+            console.log("Attempting to register account:", email);
+            await insertRecord("userAccount", {
+                username: email.trim(),
+                passwordHash: passwordHash,
+                accountRole: "Customer",
+                customerID: account.customerID
             });
+            console.log("Account insertion completed");
+            {/* End */}
 
             alert("Customer account created successfully.");
             navigate("/login");
@@ -498,7 +516,7 @@ export function EmployeeRegister({ selectedStore }) {
                 employeeName: name.trim(),
                 managementRole: "Associate"
             });
-            console.log("Create employee")
+            console.log("Created employee")
             {/* End */}
 
             {/* Get empplyeeID */}
@@ -515,7 +533,7 @@ export function EmployeeRegister({ selectedStore }) {
             console.log("Found employee")
             {/* End */}
 
-	    const account = accounts[0];
+	        const account = accounts[0];
 
             {/* userAccount Creation */}
             console.log("About to send POST request");
@@ -523,7 +541,7 @@ export function EmployeeRegister({ selectedStore }) {
                 username: email.trim(),
                 passwordHash: passwordHash,
                 accountRole: "Employee",
-                employeeID: account.employeeID.trim()
+                employeeID: account.employeeID
             });
             {/* End */}
 
