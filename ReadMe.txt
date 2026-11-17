@@ -73,9 +73,12 @@ fetch("http://127.0.0.1:5000/table", {
 
 Sending a Get request
 1. From the CMD
-   : curl -X GET "http://127.0.0.1:5000/table?column1=value1&column2=value2"
+   : curl -X GET http://127.0.0.1:5000/<table> -H "Content-Type: application/json" -d "{\"<column>\": \"<value>\"}"
 2. From the website
 fetch("http://127.0.0.1:5000/table?column1=value1&column2=value2", {
     method: "GET"
-});
+})
+.then(response => response.json())
+.then(data => console.log(data))
+.catch(error => console.error(error));
 

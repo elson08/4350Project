@@ -30,7 +30,6 @@ def route_request(table, key):
         print("Routing GET")
         result = gpud.get_record(
             table, 
-            key,
             request.args.to_dict()
         )
 

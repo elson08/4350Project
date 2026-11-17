@@ -2,15 +2,15 @@
 const API_BASE = "/api";
 
 // GET request
-export async function getData(table, filters = {}) {
-    const query = new URLSearchParams(filters);
-    const url = `${API_BASE}/${table}?${query.toString()}`;
+export async function getData(table) {
+  const params = new URLSearchParams(data);
 
-    const response = await fetch(url);
-    const data = await response.json();
+  const response = await fetch(`${API_BASE}/${table}?${params}`, {
+    method: "GET"
+  });
 
-    if (!response.ok) {
-        throw new Error(data.message || `GET failed: ${response.status}`);
+    if(!response.ok) {
+        throw new Error(data.message || 'GET failed: ${response.status}');
     }
 
     return data.result;
@@ -55,6 +55,21 @@ export async function updateData(table, data) {
 }
 
 // DELETE request
+export async function deleteData(table) {
+  const response = await fetch(`${API_BASE}/${table}`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(data)
+  });
+
+  if (!response.ok) {
+    throw new Error(`DELETE failed: ${response.status}`);
+  }
+
+  return await response.json();
+}
 export async function deleteData(table, data) {
     const response = await fetch(`${API_BASE}/${table}`, {
         method: "DELETE",
