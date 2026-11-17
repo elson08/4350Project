@@ -29,7 +29,6 @@ def route_request(table, key):
     if request.method == "GET":
         result = gpud.get_record(
             table, 
-            key,
             request.args.to_dict()
         )
 
