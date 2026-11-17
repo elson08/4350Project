@@ -308,6 +308,9 @@ export function CustomerRegister() {
 
     async function handleRegister(event) {
         event.preventDefault();
+
+        console.log("REGISTER FUNCTION CALLED");
+
         setError("");
 
         const validationError = validateRegistration(
@@ -318,6 +321,7 @@ export function CustomerRegister() {
         );
 
         if (validationError) {
+            console.log("Validation failed:", validationError);
             setError(validationError);
             return;
         }
@@ -325,7 +329,11 @@ export function CustomerRegister() {
         setLoading(true);
 
         try {
+            console.log("Starting password hash");
+
             const passwordHash = await bcrypt.hash(password, 12);
+
+            console.log("Password hash completed");
 
             console.log("Attempting to register account:", email);
             await insertRecord("userAccount", {
@@ -359,6 +367,8 @@ export function CustomerRegister() {
             alert("Customer account created successfully.");
             navigate("/login");
         } catch (error) {
+            console.error("Registration failed:", error);
+
             setError(
                 error.message ||
                 "Registration failed. Please try again."
@@ -445,14 +455,20 @@ export function EmployeeRegister({ selectedStore }) {
 
     async function handleRegister(event) {
         event.preventDefault();
+
+        console.log("EMPLOYEE REGISTER CALLED");
+        console.log("Selected store:", selectedStore);
+        
         setError("");
 
         if (selectedStore === null || selectedStore === undefined) {
+            console.log("No store selected");
             setError("Please select a store before registering.");
             navigate("/stores");
             return;
         }
 
+        console.log("Validating registration")
         const validationError = validateRegistration(
             name,
             email,
@@ -467,17 +483,28 @@ export function EmployeeRegister({ selectedStore }) {
 
         setLoading(true);
 
+        console.log("Trying password hashing")
         try {
+            console.log("Starting password hash");
+
             const passwordHash = await bcrypt.hash(password, 12);
 
-            await insertRecord("userAccount", {
-                username: email.trim(),
-                passwordHash: passwordHash,
-                accountRole: "Employee"
-            });
+            console.log("Password hash completed");
 
-            const accounts = await getRecords("userAccount", {
-                username: email.trim()
+            {/* Create employee */}
+            console.log("About to send POST request");
+            await insertRecord("employee", {
+                storeID: Number(selectedStore),
+                employeeName: name.trim(),
+                managementRole: "Associate"
+            });
+            console.log("Create employee")
+            {/* End */}
+
+            {/* Get empplyeeID */}
+            console.log("Finding employee")
+            const accounts = await getRecords("employee", {
+                employeeName: name.trim()
             });
 
             if (!accounts || accounts.length === 0) {
@@ -485,15 +512,20 @@ export function EmployeeRegister({ selectedStore }) {
                     "Your account was created, but we could not retrieve its user ID. The employee profile was not created."
                 );
             }
+            console.log("Found employee")
+            {/* End */}
 
-            const account = accounts[0];
+	    const account = accounts[0];
 
-            await insertRecord("employee", {
-                storeID: Number(selectedStore),
-                employeeName: name.trim(),
-                managementRole: "Associate",
-                userID: account.userID
+            {/* userAccount Creation */}
+            console.log("About to send POST request");
+            await insertRecord("userAccount", {
+                username: email.trim(),
+                passwordHash: passwordHash,
+                accountRole: "Employee",
+                employeeID: account.employeeID.trim()
             });
+            {/* End */}
 
             alert("Employee account created successfully.");
             navigate("/login");

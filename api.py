@@ -27,6 +27,7 @@ def route_request(table, key):
 
     # If there was a GET call
     if request.method == "GET":
+        print("Routing GET")
         result = gpud.get_record(
             table, 
             key,
@@ -35,6 +36,7 @@ def route_request(table, key):
 
     # If there was a POST call
     if request.method == "POST":
+        print("Routing POST")
         result = gpud.insert_record(
             table,
             request.get_json()
@@ -42,6 +44,7 @@ def route_request(table, key):
 
     # If there was a DELETE call
     if request.method == "DELETE":
+        print("Routing DELETE")
         result = gpud.delete_record(
             table, 
             request.get_json()
@@ -49,6 +52,7 @@ def route_request(table, key):
 
     # If there was an update request
     if request.method == "PATCH":
+        print("Routing PATCH")
         result = gpud.update_record(
             table,
             request.get_json()

@@ -44,8 +44,8 @@ function App() {
                     />
 
                     {/* Registration */}
-                    <Route path="/register/customer" element={<CustomerRegister />} />
-                    <Route path="/register/employee" element={<EmployeeRegister />} />
+                    <Route path="/register/customer" element={<CustomerRegister selectedStore={selectedStore} />} />
+                    <Route path="/register/employee" element={<EmployeeRegister selectedStore={selectedStore} />} />
 
                     {/* Customer Pages */}
                     <Route
