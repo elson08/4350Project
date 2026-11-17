@@ -8,7 +8,7 @@ def get_connection():
     connect.execute("PRAGMA foreign_keys = ON ")
     return connect
 
-def get_record(table, key=None, args=None):
+def get_record(table, json):
     connect = get_connection()
 
     # Check the table exists
@@ -27,79 +27,46 @@ def get_record(table, key=None, args=None):
     cursor = connect.execute(f'PRAGMA table_info("{table}")')
     columns = cursor.fetchall()
 
-    # Get all keys
-    primary_keys = []
+    table_keys = []
     for column in columns:
-        if column[5] > 0:
-            primary_keys.append(column[1])
+                table_keys.append(column[1])
 
-            # Understand the structure here of the records
-            # When you get a record, each column or field in the record has more info
-            # 0: Index
-            # 1: Name
-            # 2: type
-            # 3: Not Null constraint
-            # 4: default value 
-            # 5: primary key candidacy
-
-            # With that last field  
-            # 0 > It is not a pk
-            # 1 > It is a pk  
-            # 2,3,... > Part of a pk
+    input_values = []
+    input_keys = []
 
     # Check each argument exists
-    column_names = [column[1] for column in columns]
-    if args is not None:
-        for arg in args:
-            if arg not in column_names:
-                print("Argument key does not exist")
+    if json is not None:
+        for key in json.keys():
+            input_keys.append(key)
+        for value in json.values():
+            input_values.append(value)
+        for key in input_keys:
+            if key not in table_keys:
+                print("Input key does not exist")
                 connect.close()
                 return 1
 
-    if key is not None:
-        # Normalize the key to allow for composite pks
-        if not isinstance(key, tuple):
-            key = (key,)
 
-        # Confirm key length matches
-        if len(key) != len(primary_keys):
-            print("Key count is incorrect")
-            connect.close()
-            return 1
+    # Create the SQL
+    sql = f'SELECT * FROM "{table}"'
 
-    # Create SQL call
-    sql = f'Select * FROM "{table}"'
-    parameters = []
-    conditions = []
-
-    # Create conditions
-    if key is not None:
-        for column, value in zip(primary_keys, key):
-            conditions.append(f'"{column}" = ?')
-            parameters.append(value)
-
-    if args is not None:
-        for column, value in args.items():
-            conditions.append(f'"{column}" = ?')
-            parameters.append(value)
-
-    # Add WHERE clause
-    if conditions:
-        sql += " WHERE " + " AND ".join(conditions)
-
-    # Execute the SQL
-    cursor = connect.execute(sql, parameters)
-
-    # Get records
-    records = cursor.fetchall()
-
-    # Convert to dictionaries
-    result = [dict(record) for record in records]
-
-    # Close db
-    connect.close()
-
-    return result
+    if json:
+        conditions = " AND ".join(f'"{key}" = ?' for key in input_keys)
+        sql += f" WHERE {conditions}"
+    
+    # Run the SQL
+    try:
+        cursor = connect.execute(sql, input_values)
+        result = cursor.fetchall()
+        return [dict(record) for record in result]
+    except sqlite3.IntegrityError as error:
+        print(f"Database constraint error: {error}")
+        return 1
+    except sqlite3.Error as error:
+        print(f"Database error: {error}")
+        return 1
+    finally:
+        connect.close()
 
 def insert_record(table, json):
     connect = get_connection()
@@ -165,13 +132,12 @@ def insert_record(table, json):
         input_values.append(value)
 
     # Create the SQL
-    sql = f'INSERT INTO "{table}" ({", ".join(input_keys)}) VALUES({", ".join("?" for _ in input_values)})'
+    sql = f'SELECT * FROM "{table}" ({", ".join(input_keys)}) VALUES({", ".join("?" for _ in input_values)})'
 
     # Run the SQL
     try:
-        connect.execute(sql, input_values)
-        connect.commit()
-        return 0
+        result = connect.execute(sql, input_values)
+        return result
     except sqlite3.IntegrityError as error:
         print(f"Database constraint error: {error}")
         return 1
