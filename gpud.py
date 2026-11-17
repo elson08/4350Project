@@ -131,15 +131,36 @@ def insert_record(table, json):
     columns = cursor.fetchall()
         
     # Get required keys
-    req_keys = [] 
+    #req_keys = [] 
+    #all_keys = []
+    #for column in columns:
+    #        if column[3] == 1 and column[4] is None:
+    #            req_keys.append(column[1])
+    #        if column[5] > 0:
+    #            req_keys.append(column[1])
+    #        all_keys.append(column[1])
+    req_keys = []
     all_keys = []
-    for column in columns:
-            if column[3] == 1 and column[4] is None:
-                req_keys.append(column[1])
-            if column[5] > 0:
-                req_keys.append(column[1])
-            all_keys.append(column[1])
 
+    for column in columns:
+        column_name = column[1]
+        column_type = column[2]
+        not_null = column[3]
+        default_value = column[4]
+        primary_key = column[5]
+
+    # An INTEGER PRIMARY KEY is generated automatically by SQLite
+        if primary_key > 0 and column_type.upper() == "INTEGER":
+            all_keys.append(column_name)
+            continue
+
+        if not_null == 1 and default_value is None:
+            req_keys.append(column_name)
+
+        if primary_key > 0:
+            req_keys.append(column_name)
+
+        all_keys.append(column_name)
     # Confirm input format and keys are correct
     # Dont need to check for duplicate keys as python already does that
     # Confirm min number of keys is found
