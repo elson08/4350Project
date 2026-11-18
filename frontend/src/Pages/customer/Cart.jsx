@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 import { getRecords, insertRecord, updateData } from "../../services/api.js";
+import { timestamp } from "../../services/orders.js";
 
 import "./Cart.css";
 
@@ -9,14 +10,6 @@ const CARD_TYPES = ["Visa", "Mastercard", "American Express", "Discover"];
 
 function formatPrice(price) {
     return `$${Number(price).toFixed(2)}`;
-}
-
-function timestamp() {
-    const now = new Date();
-    const pad = (value) => String(value).padStart(2, "0");
-    const date = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
-    const time = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
-    return `${date} ${time}`;
 }
 
 function isValidCardNumber(digits) {

@@ -4,6 +4,7 @@ import PartsCatalog from "./Pages/customer/PartsCatalog.jsx";
 import Cart from "./Pages/customer/Cart.jsx";
 import PaymentOrderHistory from "./Pages/customer/PaymentOrderHistory.jsx";
 import Inventory from "./Pages/employee/Inventory.jsx";
+import ManageOrders from "./Pages/employee/ManageOrders.jsx";
 import PageLayout from "./components/PageLayout.jsx";
 import RequireRole from "./components/RequireRole.jsx";
 import { useSavedState } from "./useSavedState.js";
@@ -12,7 +13,6 @@ import "./App.css";
 import {
     CustomerRegister,
     EmployeeRegister,
-    ManageOrders,
     Suppliers
 } from "./Pages/Pages.jsx";
 

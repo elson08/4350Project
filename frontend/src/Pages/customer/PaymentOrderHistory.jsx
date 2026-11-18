@@ -1,7 +1,7 @@
 import { Fragment, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
-import { getRecords, updateData } from "../../services/api.js";
+import { loadOrders, restockAndRefund } from "../../services/orders.js";
 
 import "./PaymentOrderHistory.css";
 
@@ -11,64 +11,6 @@ function formatPrice(price) {
 
 function formatStatus(status) {
     return status.charAt(0).toUpperCase() + status.slice(1);
-}
-
-function timestamp() {
-    const now = new Date();
-    const pad = (value) => String(value).padStart(2, "0");
-    const date = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
-    const time = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
-    return `${date} ${time}`;
-}
-
-async function loadOrders(customerID) {
-    const [orders, items, payments, parts, stores] = await Promise.all([
-        getRecords("order", { customerID }),
-        getRecords("orderItem"),
-        getRecords("payment"),
-        getRecords("part"),
-        getRecords("store")
-    ]);
-
-    return orders
-        .map((order) => {
-            const orderItems = items
-                .filter((item) => item.orderID === order.orderID)
-                .map((item) => ({ ...item, part: parts.find((part) => part.partID === item.partID) }));
-
-            return {
-                ...order,
-                items: orderItems,
-                payment: payments.find((payment) => payment.orderID === order.orderID),
-                store: stores.find((store) => store.storeID === order.storeID),
-                total: orderItems.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0)
-            };
-        })
-        .sort((first, second) => second.orderID - first.orderID);
-}
-
-async function cancelOrder(order) {
-    const inventory = await getRecords("inventory", { storeID: order.storeID });
-
-    for (const item of order.items) {
-        const stock = inventory.find((row) => row.partID === item.partID);
-        await updateData("inventory", {
-            conditions: { storeID: order.storeID, partID: item.partID },
-            updates: { quantity: (stock ? stock.quantity : 0) + item.quantity }
-        });
-    }
-
-    await updateData("order", {
-        conditions: { orderID: order.orderID },
-        updates: { status: "cancelled", updatedAt: timestamp() }
-    });
-
-    if (order.payment) {
-        await updateData("payment", {
-            conditions: { paymentID: order.payment.paymentID },
-            updates: { paymentStatus: "Refunded" }
-        });
-    }
 }
 
 function PaymentOrderHistory({ user }) {
@@ -89,7 +31,7 @@ function PaymentOrderHistory({ user }) {
 
         let isCurrent = true;
 
-        loadOrders(customerID)
+        loadOrders({ customerID })
             .then((loadedOrders) => {
                 if (isCurrent) {
                     setOrders(loadedOrders);
@@ -143,7 +85,7 @@ function PaymentOrderHistory({ user }) {
         setCancelError("");
         setCancellingID(order.orderID);
         try {
-            await cancelOrder(order);
+            await restockAndRefund(order, "cancelled");
             setReloadCount((count) => count + 1);
         } catch {
             setCancelError(`Couldn't cancel order #${order.orderID}.`);

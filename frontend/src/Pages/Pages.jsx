@@ -364,10 +364,6 @@ export function EmployeeRegister({ selectedStore }) {
 }
 
 // Employee Pages
-export function ManageOrders() {
-    return <Page title="Manage Orders" description="View and manage customer orders." />;
-}
-
 export function Suppliers() {
     return <Page title="Supplier Management" description="View and manage suppliers." />;
 }
