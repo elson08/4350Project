@@ -2,8 +2,30 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import bcrypt from "bcryptjs";
-import { getRecords, insertRecord } from "../services/api.js";
+import { deleteData, getRecords, insertRecord } from "../services/api.js";
 import { validateRegistration } from "../validation.js";
+
+const EMAIL_IN_USE = "That email is already in use.";
+
+async function createAccount({ table, profile, idField, accountRole, email, password }) {
+    const existing = await getRecords("userAccount", { username: email });
+    if (existing.length > 0) {
+        throw new Error(EMAIL_IN_USE);
+    }
+
+    const passwordHash = await bcrypt.hash(password, 12);
+    await insertRecord(table, profile);
+
+    const matches = await getRecords(table, profile);
+    const id = Math.max(...matches.map((row) => row[idField]));
+
+    try {
+        await insertRecord("userAccount", { username: email, passwordHash, accountRole, [idField]: id });
+    } catch (error) {
+        await deleteData(table, { [idField]: id });
+        throw error;
+    }
+}
 
 // Customer Registration
 export function CustomerRegister() {
@@ -21,78 +43,28 @@ export function CustomerRegister() {
 
     async function handleRegister(event) {
         event.preventDefault();
-
-        console.log("CUSTOMER REGISTER CALLED");
-
         setError("");
 
-        console.log("Validating")
-        const validationError = validateRegistration(
-            name,
-            email,
-            password,
-            confirmPassword
-        );
-
+        const validationError = validateRegistration(name, email, password, confirmPassword);
         if (validationError) {
-            console.log("Validation failed:", validationError);
             setError(validationError);
             return;
         }
-        console.log("Validation Complete")
 
         setLoading(true);
-
         try {
-            console.log("Starting password hash");
-
-            const passwordHash = await bcrypt.hash(password, 12);
-
-            console.log("Password hash completed");
-
-            // Create customer
-            console.log("Attempting to create customer profile");
-            await insertRecord("customer", {
-                name: name.trim(),
-                address: address.trim(),
-                phone: phone.trim()
-            });
-            // End
-
-            // Retrieve the newly created account so we can get its customerID
-            const accounts = await getRecords("customer", {
-                name: name.trim()
-            });
-
-            if (!accounts || accounts.length === 0) {
-                throw new Error(
-                    "Your account was created, but we could not retrieve its user ID. The customer profile was not created."
-                );
-            }
-
-            const account = accounts[0];
-            // End
-
-            {/* Create userAccount */}
-            console.log("Attempting to register account:", email);
-            await insertRecord("userAccount", {
-                username: email.trim(),
-                passwordHash: passwordHash,
+            await createAccount({
+                table: "customer",
+                profile: { name: name.trim(), address: address.trim(), phone: phone.trim() },
+                idField: "customerID",
                 accountRole: "Customer",
-                customerID: account.customerID
+                email: email.trim(),
+                password
             });
-            console.log("Account insertion completed");
-            {/* End */}
-
             alert("Customer account created successfully.");
             navigate("/login");
-        } catch (error) {
-            console.error("Registration failed:", error);
-
-            setError(
-                error.message ||
-                "Registration failed. Please try again."
-            );
+        } catch (registerError) {
+            setError(registerError.message === EMAIL_IN_USE ? EMAIL_IN_USE : "Registration failed. Please try again.");
         } finally {
             setLoading(false);
         }
@@ -175,85 +147,34 @@ export function EmployeeRegister({ selectedStore }) {
 
     async function handleRegister(event) {
         event.preventDefault();
-
-        console.log("EMPLOYEE REGISTER CALLED");
-        console.log("Selected store:", selectedStore);
-        
         setError("");
 
         if (selectedStore === null || selectedStore === undefined) {
-            console.log("No store selected");
             setError("Please select a store before registering.");
-            navigate("/stores");
+            navigate("/login");
             return;
         }
 
-        console.log("Validating registration")
-        const validationError = validateRegistration(
-            name,
-            email,
-            password,
-            confirmPassword
-        );
-
+        const validationError = validateRegistration(name, email, password, confirmPassword);
         if (validationError) {
             setError(validationError);
             return;
         }
 
         setLoading(true);
-
-        console.log("Trying password hashing")
         try {
-            console.log("Starting password hash");
-
-            const passwordHash = await bcrypt.hash(password, 12);
-
-            console.log("Password hash completed");
-
-            {/* Create employee */}
-            console.log("About to send POST request");
-            await insertRecord("employee", {
-                storeID: Number(selectedStore),
-                employeeName: name.trim(),
-                managementRole: "Associate"
-            });
-            console.log("Created employee")
-            {/* End */}
-
-            {/* Get empplyeeID */}
-            console.log("Finding employee")
-            const accounts = await getRecords("employee", {
-                employeeName: name.trim()
-            });
-
-            if (!accounts || accounts.length === 0) {
-                throw new Error(
-                    "Your account was created, but we could not retrieve its user ID. The employee profile was not created."
-                );
-            }
-            console.log("Found employee")
-            {/* End */}
-
-	        const account = accounts[0];
-
-            {/* userAccount Creation */}
-            console.log("About to send POST request");
-            await insertRecord("userAccount", {
-                username: email.trim(),
-                passwordHash: passwordHash,
+            await createAccount({
+                table: "employee",
+                profile: { storeID: Number(selectedStore), employeeName: name.trim(), managementRole: "Associate" },
+                idField: "employeeID",
                 accountRole: "Employee",
-                employeeID: account.employeeID
+                email: email.trim(),
+                password
             });
-            {/* End */}
-
             alert("Employee account created successfully.");
             navigate("/login");
-        } catch (error) {
-            setError(
-                error.message ||
-                "Registration failed. Please try again."
-            );
+        } catch (registerError) {
+            setError(registerError.message === EMAIL_IN_USE ? EMAIL_IN_USE : "Registration failed. Please try again.");
         } finally {
             setLoading(false);
         }
