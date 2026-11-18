@@ -609,8 +609,106 @@ export function EmployeeRegister({ selectedStore }) {
 }
 
 // Customer Pages
-export function PartsCatalog() {
-    return <Page title="Parts Catalog" description="Browse available automotive parts." />;
+export function PartsCatalog({ selectedStore }) {
+    if (selectedStore == null) {
+        return (
+            <section>
+                <h1>Parts Catalog</h1>
+                <Link to="/stores">Choose a store to view its parts</Link>
+            </section>
+        );
+    }
+
+    return <StorePartsCatalog key={selectedStore} storeID={selectedStore} />;
+}
+
+function StorePartsCatalog({ storeID }) {
+    const [catalog, setCatalog] = useState(null);
+    const [error, setError] = useState("");
+    const [query, setQuery] = useState("");
+    const [attempt, setAttempt] = useState(0);
+
+    useEffect(() => {
+        let active = true;
+
+        Promise.all([
+            getRecords("inventory", { storeID }),
+            getRecords("part"),
+        ]).then(([inventory, parts]) => {
+            if (!active) return;
+
+            const stock = new Map();
+            for (const item of inventory) {
+                stock.set(item.partID, (stock.get(item.partID) ?? 0) + item.quantity);
+            }
+            setCatalog(parts.filter((part) => stock.has(part.partID)).map((part) => ({
+                ...part,
+                quantity: stock.get(part.partID),
+            })));
+        }).catch(() => {
+            if (active) setError("Could not load parts for this store.");
+        });
+
+        return () => { active = false; };
+    }, [storeID, attempt]);
+
+    const search = query.trim().toLowerCase();
+    const visibleParts = catalog?.filter((part) =>
+        [part.partName, part.category, part.condition].some((value) =>
+            String(value ?? "").toLowerCase().includes(search)
+        )
+    );
+    const priceFormatter = new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+    });
+
+    return (
+        <section className="store-selection">
+            <h1>Parts Catalog</h1>
+            <Link to="/stores">Change store</Link>
+            {!catalog && !error && <p role="status">Loading parts…</p>}
+            {error && (
+                <div>
+                    <p role="alert">{error}</p>
+                    <button type="button" onClick={() => {
+                        setError("");
+                        setAttempt(attempt + 1);
+                    }}>Retry</button>
+                </div>
+            )}
+            {catalog?.length === 0 && <p>This store has no parts listed.</p>}
+            {catalog?.length > 0 && (
+                <>
+                    <p>
+                        <label>
+                            Search parts{" "}
+                            <input
+                                type="search"
+                                value={query}
+                                onChange={(event) => setQuery(event.target.value)}
+                            />
+                        </label>
+                    </p>
+                    {visibleParts.length === 0 ? (
+                        <p role="status">No parts match your search.</p>
+                    ) : (
+                        <ul>
+                            {visibleParts.map((part) => (
+                                <li key={part.partID}>
+                                    <strong>{part.partName}</strong>
+                                    {" · "}{part.category}
+                                    {" · "}{part.condition}
+                                    {" · "}{priceFormatter.format(part.unitPrice)}
+                                    {" · "}{part.quantity > 0 ? `${part.quantity} in stock` : "Out of stock"}
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                </>
+            )}
+        </section>
+    );
 }
 
 export function Cart() {
