@@ -363,20 +363,6 @@ export function EmployeeRegister({ selectedStore }) {
     );
 }
 
-// Customer Pages
-export function Cart() {
-    return <Page title="Shopping Cart" description="Review your selected parts." />;
-}
-
-export function PaymentOrderHistory() {
-    return (
-        <Page
-            title="Payment & Order History"
-            description="Review your orders and payment information."
-        />
-    );
-}
-
 // Employee Pages
 export function Inventory() {
     return <Page title="Inventory Management" description="View and manage store inventory." />;

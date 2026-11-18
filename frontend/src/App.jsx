@@ -1,6 +1,8 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./Pages/Login.jsx";
 import PartsCatalog from "./Pages/customer/PartsCatalog.jsx";
+import Cart from "./Pages/customer/Cart.jsx";
+import PaymentOrderHistory from "./Pages/customer/PaymentOrderHistory.jsx";
 import PageLayout from "./components/PageLayout.jsx";
 import { useSavedState } from "./useSavedState.js";
 import "./App.css";
@@ -8,8 +10,6 @@ import "./App.css";
 import {
     CustomerRegister,
     EmployeeRegister,
-    Cart,
-    PaymentOrderHistory,
     Inventory,
     ManageOrders,
     Suppliers
@@ -48,8 +48,11 @@ function App() {
                         path="/customer/parts"
                         element={<PartsCatalog selectedStore={selectedStore} cart={cart} setCart={setCart} />}
                     />
-                    <Route path="/customer/cart" element={<Cart />} />
-                    <Route path="/customer/orders" element={<PaymentOrderHistory />} />
+                    <Route
+                        path="/customer/cart"
+                        element={<Cart selectedStore={selectedStore} user={user} cart={cart} setCart={setCart} />}
+                    />
+                    <Route path="/customer/orders" element={<PaymentOrderHistory user={user} />} />
 
                     {/* Employee Pages */}
                     <Route
