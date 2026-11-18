@@ -42,7 +42,6 @@ function Navbar({ user, onLogout }) {
             <div className="navbar-bar">
                 <span className="navbar-brand">
                     <Link to="/">Auto Parts</Link>
-                    {isStoreMode && <span className="navbar-mode">Store mode</span>}
                 </span>
 
                 {menu && (

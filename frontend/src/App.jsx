@@ -3,14 +3,15 @@ import Login from "./Pages/Login.jsx";
 import PartsCatalog from "./Pages/customer/PartsCatalog.jsx";
 import Cart from "./Pages/customer/Cart.jsx";
 import PaymentOrderHistory from "./Pages/customer/PaymentOrderHistory.jsx";
+import Inventory from "./Pages/employee/Inventory.jsx";
 import PageLayout from "./components/PageLayout.jsx";
+import RequireRole from "./components/RequireRole.jsx";
 import { useSavedState } from "./useSavedState.js";
 import "./App.css";
 
 import {
     CustomerRegister,
     EmployeeRegister,
-    Inventory,
     ManageOrders,
     Suppliers
 } from "./Pages/Pages.jsx";
@@ -57,15 +58,27 @@ function App() {
                     {/* Employee Pages */}
                     <Route
                         path="/employee/inventory"
-                        element={<Inventory selectedStore={selectedStore} />}
+                        element={
+                            <RequireRole user={user} role="employee">
+                                <Inventory selectedStore={selectedStore} />
+                            </RequireRole>
+                        }
                     />
                     <Route
                         path="/employee/orders"
-                        element={<ManageOrders selectedStore={selectedStore} />}
+                        element={
+                            <RequireRole user={user} role="employee">
+                                <ManageOrders selectedStore={selectedStore} />
+                            </RequireRole>
+                        }
                     />
                     <Route
                         path="/employee/suppliers"
-                        element={<Suppliers selectedStore={selectedStore} />}
+                        element={
+                            <RequireRole user={user} role="employee">
+                                <Suppliers selectedStore={selectedStore} />
+                            </RequireRole>
+                        }
                     />
                     <Route
                         path="/register/customer"
