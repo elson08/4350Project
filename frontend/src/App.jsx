@@ -1,78 +1,100 @@
-
-import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
+import { useState } from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Home from "./Pages/Home.jsx";
+import "./App.css";
 
 import {
-  Home,
-  StoreSelection,
-  CustomerLogin,
-  CustomerRegister,
-  PartsCatalog,
-  Cart,
-  Payment,
-  OrderHistory,
-  EmployeeLogin,
-  EmployeeDashboard,
-  Inventory,
-  ManageOrders,
-  SupplierLogin,
-  SupplierDashboard,
-  SupplierOrders
+    StoreSelection,
+    Login,
+    CustomerRegister,
+    EmployeeRegister,
+    PartsCatalog,
+    Cart,
+    PaymentOrderHistory,
+    Inventory,
+    ManageOrders,
+    Suppliers
 } from "./Pages/Pages.jsx";
 
-function Navbar() {
-  return (
-    <nav>
-      <Link to="/">Home</Link> |{" "}
-      <Link to="/stores">Select Store</Link> |{" "}
-      <Link to="/customer/login">Customer Login</Link> |{" "}
-      <Link to="/customer/register">Register</Link> |{" "}
-      <Link to="/parts">Parts</Link> |{" "}
-      <Link to="/cart">Cart</Link> |{" "}
-      <Link to="/payment">Payment</Link> |{" "}
-      <Link to="/orders">Order History</Link> |{" "}
-      <Link to="/employee/login">Employee Login</Link> |{" "}
-      <Link to="/employee/dashboard">Employee Dashboard</Link> |{" "}
-      <Link to="/employee/inventory">Inventory</Link> |{" "}
-      <Link to="/employee/orders">Manage Orders</Link> |{" "}
-      <Link to="/supplier/login">Supplier Login</Link> |{" "}
-      <Link to="/supplier/dashboard">Supplier Dashboard</Link> |{" "}
-      <Link to="/supplier/orders">Supplier Orders</Link>
-    </nav>
-  );
-}
-
 function App() {
-  return (
-    <BrowserRouter>
-      <Navbar />
+    const [selectedStore, setSelectedStore] = useState(null);
 
-      <main>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/stores" element={<StoreSelection />} />
+    return (
+        <BrowserRouter>
+            <main>
+                <Routes>
+                    {/* Main Home Page */}
+                    <Route path="/" element={<Home />} />
 
-          <Route path="/customer/login" element={<CustomerLogin />} />
-          <Route path="/customer/register" element={<CustomerRegister />} />
-          <Route path="/parts" element={<PartsCatalog />} />
-          <Route path="/cart" element={<Cart />} />
-          <Route path="/payment" element={<Payment />} />
-          <Route path="/orders" element={<OrderHistory />} />
+                    {/* Store Selection and Shared Login */}
+                    <Route
+                        path="/stores"
+                        element={
+                            <StoreSelection
+                                setSelectedStore={setSelectedStore}
+                            />
+                        }
+                    />
 
-          <Route path="/employee/login" element={<EmployeeLogin />} />
-          <Route path="/employee/dashboard" element={<EmployeeDashboard />} />
-          <Route path="/employee/inventory" element={<Inventory />} />
-          <Route path="/employee/orders" element={<ManageOrders />} />
+                    <Route
+                        path="/login"
+                        element={
+                            <Login selectedStore={selectedStore} />
+                        }
+                    />
 
-          <Route path="/supplier/login" element={<SupplierLogin />} />
-          <Route path="/supplier/dashboard" element={<SupplierDashboard />} />
-          <Route path="/supplier/orders" element={<SupplierOrders />} />
-        </Routes>
-      </main>
-    </BrowserRouter>
-  );
+                    {/* Registration */}
+                    <Route path="/register/customer" element={<CustomerRegister selectedStore={selectedStore} />} />
+                    <Route path="/register/employee" element={<EmployeeRegister selectedStore={selectedStore} />} />
+
+                    {/* Customer Pages */}
+                    <Route
+                        path="/customer/parts"
+                        element={<PartsCatalog selectedStore={selectedStore} />}
+                    />
+                    <Route path="/customer/cart" element={<Cart />} />
+                    <Route path="/customer/orders" element={<PaymentOrderHistory />} />
+
+                    {/* Employee Pages */}
+                    <Route
+                        path="/employee/inventory"
+                        element={<Inventory selectedStore={selectedStore} />}
+                    />
+                    <Route
+                        path="/employee/orders"
+                        element={<ManageOrders selectedStore={selectedStore} />}
+                    />
+                    <Route
+                        path="/employee/suppliers"
+                        element={<Suppliers selectedStore={selectedStore} />}
+                    />
+                    <Route
+                        path="/stores"
+                        element={<StoreSelection setSelectedStore={setSelectedStore} />}
+                    />
+
+                    <Route
+                        path="/login"
+                        element={<Login selectedStore={selectedStore} />}
+                    />
+
+                    <Route
+                        path="/register/customer"
+                        element={<CustomerRegister />}
+                    />
+
+                    <Route
+                        path="/register/employee"
+                        element={<EmployeeRegister selectedStore={selectedStore} />}
+                    />
+                </Routes>
+            </main>
+        </BrowserRouter>
+    );
 }
 
 export default App;
+
 
 // import { useState } from 'react'
 // import heroImg from './assets/hero.png'

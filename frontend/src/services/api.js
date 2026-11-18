@@ -1,68 +1,86 @@
 
-const API_BASE = "http://127.0.0.1:5000";
+const API_BASE = "/api";
 
 // GET request
-export async function getData(table) {
-  const params = new URLSearchParams(data);
+export async function getData(table, filters = {}) {
+    const params = new URLSearchParams(filters);
 
-  const response = await fetch(`${API_BASE}/${table}?${params}`, {
-    method: "GET"
-  });
+    const response = await fetch(
+        `${API_BASE}/${table}?${params.toString()}`,
+        {
+            method: "GET"
+        }
+    );
 
-  if(!response.ok) {
-    throw new Error('GET failed: ${response.status}');
-  }
+    const data = await response.json();
 
-  return await response.json();
+    if (!response.ok) {
+        throw new Error(
+            data.message || `GET failed: ${response.status}`
+        );
+    }
+
+    return data.result;
 }
 
 // POST request
 export async function postData(table, data) {
-  const response = await fetch(`${API_BASE}/${table}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(data)
-  });
+    const response = await fetch(`${API_BASE}/${table}`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
+    });
 
-  if (!response.ok) {
-    throw new Error(`POST failed: ${response.status}`);
-  }
+    const result = await response.json();
 
-  return await response.json();
+    if (!response.ok || result.result !== 0) {
+        throw new Error(result.message || `POST failed: ${response.status}`);
+    }
+
+    return result.result;
 }
 
 // PATCH request
 export async function updateData(table, data) {
-  const response = await fetch(`${API_BASE}/${table}`, {
-    method: "PATCH",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(data)
-  });
+    const response = await fetch(`${API_BASE}/${table}`, {
+        method: "PATCH",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
+    });
 
-  if (!response.ok) {
-    throw new Error(`PATCH failed: ${response.status}`);
-  }
+    const result = await response.json();
 
-  return await response.json();
+    if (!response.ok || result.result === 1) {
+        throw new Error(result.message || `PATCH failed: ${response.status}`);
+    }
+
+    return result.result;
 }
 
 // DELETE request
-export async function deleteData(table) {
-  const response = await fetch(`${API_BASE}/${table}`, {
-    method: "DELETE",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(data)
-  });
+export async function deleteData(table, data) {
+    const response = await fetch(`${API_BASE}/${table}`, {
+        method: "DELETE",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
+    });
 
-  if (!response.ok) {
-    throw new Error(`DELETE failed: ${response.status}`);
-  }
+    const result = await response.json();
 
-  return await response.json();
+    if (!response.ok || result.result === 1) {
+        throw new Error(result.message || `DELETE failed: ${response.status}`);
+    }
+
+    return result.result;
 }
+
+// Compatibility names for existing login and registration code
+export const getRecords = getData;
+export const insertRecord = postData;
+

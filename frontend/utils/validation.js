@@ -1,0 +1,13 @@
+// validateName()
+
+
+
+// validateEmail()
+
+
+
+// validatePassword()
+
+
+
+// validateConfirmPassword()
