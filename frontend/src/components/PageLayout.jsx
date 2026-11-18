@@ -2,10 +2,10 @@ import Navbar from "./Navbar.jsx";
 
 import "./PageLayout.css";
 
-function PageLayout({ children }) {
+function PageLayout({ user, onLogout, children }) {
     return (
         <>
-            <Navbar />
+            <Navbar user={user} onLogout={onLogout} />
             <main className="page">{children}</main>
         </>
     );

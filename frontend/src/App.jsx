@@ -1,7 +1,7 @@
-import { useState } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./Pages/Login.jsx";
 import PageLayout from "./components/PageLayout.jsx";
+import { useSavedState } from "./useSavedState.js";
 import "./App.css";
 
 import {
@@ -16,18 +16,27 @@ import {
 } from "./Pages/Pages.jsx";
 
 function App() {
-    const [selectedStore, setSelectedStore] = useState(null);
+    const [selectedStore, setSelectedStore] = useSavedState("selectedStore", null);
+    const [user, setUser] = useSavedState("user", null);
+    const [, setCart] = useSavedState("cart", []);
+
+    function logout() {
+        setUser(null);
+        setCart([]);
+    }
 
     return (
         <BrowserRouter>
-            <PageLayout>
+            <PageLayout user={user} onLogout={logout}>
                 <Routes>
                     <Route path="/" element={<Navigate to="/login" replace />} />
 
                     <Route path="/stores" element={<Navigate to="/login" replace />} />
                     <Route
                         path="/login"
-                        element={<Login selectedStore={selectedStore} setSelectedStore={setSelectedStore} />}
+                        element={
+                            <Login selectedStore={selectedStore} setSelectedStore={setSelectedStore} setUser={setUser} />
+                        }
                     />
 
                     {/* Registration */}

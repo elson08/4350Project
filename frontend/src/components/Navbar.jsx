@@ -1,4 +1,4 @@
-import { Link, NavLink, useLocation } from "react-router-dom";
+import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 
 import "./Navbar.css";
 
@@ -26,10 +26,16 @@ function menuFor(pathname) {
     return null;
 }
 
-function Navbar() {
+function Navbar({ user, onLogout }) {
     const { pathname } = useLocation();
+    const navigate = useNavigate();
     const menu = menuFor(pathname);
     const isStoreMode = menu?.mode === "store";
+
+    function handleLogout() {
+        onLogout();
+        navigate("/login");
+    }
 
     return (
         <header className={isStoreMode ? "navbar navbar-store" : "navbar"}>
@@ -49,9 +55,13 @@ function Navbar() {
                     </nav>
                 )}
 
-                {menu && (
+                {user && (
                     <div className="navbar-account">
-                        <Link to="/login">Log out</Link>
+                        <span>{user.storeName}</span>
+                        <span>{user.name}</span>
+                        <button type="button" onClick={handleLogout}>
+                            Log out
+                        </button>
                     </div>
                 )}
             </div>

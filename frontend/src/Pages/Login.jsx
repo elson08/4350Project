@@ -20,14 +20,14 @@ async function findAccount(username, accountType) {
     return account;
 }
 
-async function checkProfile(account, accountType, storeID) {
+async function loadProfileName(account, accountType, storeID) {
     if (accountType === "customer") {
         const customers = await getRecords("customer", { customerID: account.customerID });
         if (!customers || customers.length === 0) {
             throw new Error("Account not found.");
         }
 
-        return;
+        return customers[0].name;
     }
 
     const employees = await getRecords("employee", { employeeID: account.employeeID });
@@ -38,9 +38,11 @@ async function checkProfile(account, accountType, storeID) {
     if (Number(employees[0].storeID) !== storeID) {
         throw new Error("You are not assigned to this store.");
     }
+
+    return employees[0].employeeName;
 }
 
-function Login({ selectedStore, setSelectedStore }) {
+function Login({ selectedStore, setSelectedStore, setUser }) {
     const [stores, setStores] = useState([]);
     const [storesError, setStoresError] = useState("");
     const [accountType, setAccountType] = useState("customer");
@@ -87,9 +89,17 @@ function Login({ selectedStore, setSelectedStore }) {
                 throw new Error("Incorrect email or password.");
             }
 
-            await checkProfile(account, accountType, storeID);
+            const name = await loadProfileName(account, accountType, storeID);
+            const store = stores.find((candidate) => candidate.storeID === storeID);
 
             setSelectedStore(storeID);
+            setUser({
+                role: accountType,
+                customerID: account.customerID,
+                employeeID: account.employeeID,
+                name,
+                storeName: store.storeName
+            });
             navigate(isCustomer ? "/customer/parts" : "/employee/inventory");
         } catch (loginError) {
             setError(loginError.message || "Login failed.");
