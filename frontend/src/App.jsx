@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./Pages/Login.jsx";
+import PartsCatalog from "./Pages/customer/PartsCatalog.jsx";
 import PageLayout from "./components/PageLayout.jsx";
 import { useSavedState } from "./useSavedState.js";
 import "./App.css";
@@ -7,7 +8,6 @@ import "./App.css";
 import {
     CustomerRegister,
     EmployeeRegister,
-    PartsCatalog,
     Cart,
     PaymentOrderHistory,
     Inventory,
@@ -18,7 +18,7 @@ import {
 function App() {
     const [selectedStore, setSelectedStore] = useSavedState("selectedStore", null);
     const [user, setUser] = useSavedState("user", null);
-    const [, setCart] = useSavedState("cart", []);
+    const [cart, setCart] = useSavedState("cart", []);
 
     function logout() {
         setUser(null);
@@ -46,7 +46,7 @@ function App() {
                     {/* Customer Pages */}
                     <Route
                         path="/customer/parts"
-                        element={<PartsCatalog selectedStore={selectedStore} />}
+                        element={<PartsCatalog selectedStore={selectedStore} cart={cart} setCart={setCart} />}
                     />
                     <Route path="/customer/cart" element={<Cart />} />
                     <Route path="/customer/orders" element={<PaymentOrderHistory />} />

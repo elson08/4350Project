@@ -65,3 +65,124 @@ a {
         color: var(--accent-hover);
     }
 }
+
+.card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+}
+
+.muted {
+    color: var(--text-muted);
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+
+    label {
+        font-size: 0.8125rem;
+        font-weight: 600;
+        color: var(--text-label);
+    }
+}
+
+.field input,
+.field select {
+    min-height: 44px;
+    padding: 0 0.75rem;
+    font: inherit;
+    font-size: 0.875rem;
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-small);
+    box-sizing: border-box;
+}
+
+.button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 0 1rem;
+    font: inherit;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-small);
+    cursor: pointer;
+
+    &:disabled {
+        color: var(--text-muted);
+        background: var(--row-border);
+        border-color: var(--row-border);
+        cursor: not-allowed;
+    }
+}
+
+.button-primary {
+    color: #ffffff;
+    background: var(--accent);
+    border-color: var(--accent);
+
+    &:hover:not(:disabled) {
+        background: var(--accent-hover);
+    }
+
+    &:disabled {
+        color: #ffffff;
+        background: var(--accent-disabled);
+        border-color: var(--accent-disabled);
+    }
+}
+
+.message {
+    padding: 0.625rem 0.75rem;
+    font-size: 0.875rem;
+    border-radius: var(--radius-small);
+}
+
+.message-error {
+    color: var(--error-text);
+    background: var(--error-bg);
+}
+
+.message-success {
+    color: #1c5e3a;
+    background: #e2f2e9;
+}
+
+.table-scroll {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+}
+
+th {
+    padding: 0.75rem;
+    text-align: left;
+    font-weight: 600;
+    white-space: nowrap;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border);
+}
+
+td {
+    padding: 0.75rem;
+    vertical-align: middle;
+    border-bottom: 1px solid var(--row-border);
+}
+
+.number {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}

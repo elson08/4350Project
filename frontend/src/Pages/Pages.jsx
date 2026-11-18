@@ -364,10 +364,6 @@ export function EmployeeRegister({ selectedStore }) {
 }
 
 // Customer Pages
-export function PartsCatalog() {
-    return <Page title="Parts Catalog" description="Browse available automotive parts." />;
-}
-
 export function Cart() {
     return <Page title="Shopping Cart" description="Review your selected parts." />;
 }
