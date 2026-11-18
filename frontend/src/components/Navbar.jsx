@@ -11,7 +11,9 @@ const CUSTOMER_LINKS = [
 const STORE_LINKS = [
     { to: "/employee/inventory", label: "Inventory" },
     { to: "/employee/orders", label: "Orders" },
-    { to: "/employee/suppliers", label: "Suppliers" }
+    { to: "/employee/suppliers", label: "Suppliers" },
+    { to: "/employee/employees", label: "Employees" },
+    { to: "/employee/reports", label: "Reports" }
 ];
 
 function menuFor(pathname) {

@@ -5,16 +5,15 @@ import Cart from "./Pages/customer/Cart.jsx";
 import PaymentOrderHistory from "./Pages/customer/PaymentOrderHistory.jsx";
 import Inventory from "./Pages/employee/Inventory.jsx";
 import ManageOrders from "./Pages/employee/ManageOrders.jsx";
+import Employees from "./Pages/employee/Employees.jsx";
+import Suppliers from "./Pages/employee/Suppliers.jsx";
+import Reports from "./Pages/employee/Reports.jsx";
 import PageLayout from "./components/PageLayout.jsx";
 import RequireRole from "./components/RequireRole.jsx";
 import { useSavedState } from "./useSavedState.js";
 import "./App.css";
 
-import {
-    CustomerRegister,
-    EmployeeRegister,
-    Suppliers
-} from "./Pages/Pages.jsx";
+import { CustomerRegister, EmployeeRegister } from "./Pages/Pages.jsx";
 
 function App() {
     const [selectedStore, setSelectedStore] = useSavedState("selectedStore", null);
@@ -69,6 +68,22 @@ function App() {
                         element={
                             <RequireRole user={user} role="employee">
                                 <ManageOrders selectedStore={selectedStore} />
+                            </RequireRole>
+                        }
+                    />
+                    <Route
+                        path="/employee/employees"
+                        element={
+                            <RequireRole user={user} role="employee">
+                                <Employees selectedStore={selectedStore} user={user} />
+                            </RequireRole>
+                        }
+                    />
+                    <Route
+                        path="/employee/reports"
+                        element={
+                            <RequireRole user={user} role="employee">
+                                <Reports selectedStore={selectedStore} />
                             </RequireRole>
                         }
                     />

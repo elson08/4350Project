@@ -1,0 +1,42 @@
+.reports {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+
+    h2 {
+        font-size: 1.125rem;
+    }
+}
+
+.reports-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1rem 0.5rem;
+
+    .field {
+        width: 180px;
+    }
+}
+
+.reports-title {
+    padding: 1rem 1rem 0.5rem;
+}
+
+.reports-empty {
+    padding: 0.5rem 1rem 1.25rem;
+}
+
+.reports-columns {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 1.5rem;
+}
+
+.reports-column {
+    flex: 1 1 320px;
+    min-width: 0;
+}
