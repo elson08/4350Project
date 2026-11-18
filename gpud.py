@@ -1,5 +1,6 @@
 
 import sqlite3
+from contextlib import closing
 
 def get_connection():
     # Connect to the database
@@ -69,83 +70,60 @@ def get_record(table, json):
         connect.close()
 
 def insert_record(table, json):
-    connect = get_connection()
-
-    # Check the table exists
-    cursor = connect.execute(
-        "SELECT name FROM sqlite_master WHERE type='table' AND name=?",
-        (table,)
-    )
-
-    # Check the JSON is a dict object
     if not isinstance(json, dict) or not json:
         print("JSON object must be a dictionary")
-        connect.close()
         return 1
 
-    if cursor.fetchone() is None:
-        print("Table not found")
-        connect.close()
-        return 1
-
-    # Verify key names
-    input_keys = []
-    for key in json:
-        input_keys.append(key)
-
-    #Check the primary key exists
-    cursor = connect.execute(f'PRAGMA table_info("{table}")')
-    columns = cursor.fetchall()
-        
-    # Get required keys
-    req_keys = [] 
-    all_keys = []
-    for column in columns:
-            if column[3] == 1 and column[4] is None:
-                req_keys.append(column[1])
-            if column[5] > 0:
-                req_keys.append(column[1])
-            all_keys.append(column[1])
-
-    # Confirm input format and keys are correct
-    # Dont need to check for duplicate keys as python already does that
-    # Confirm min number of keys is found
-
-    # Check required keys are present
-    for key in req_keys:
-        if key not in input_keys:
-            print(f"Missing a required key: {key}")
-            connect.close()
-            return 1
-
-    # Check all input keys are valid
-    for key in input_keys:
-        if key not in all_keys:
-            print(f"Invalid key: {key}")
-            connect.close()
-            return 1
-
-    # Get the input values for the sql
-    # I already got the keys above
-    input_values = []
-    for value in json.values():
-        input_values.append(value)
-
-    # Create the SQL
-    sql = f'SELECT * FROM "{table}" ({", ".join(input_keys)}) VALUES({", ".join("?" for _ in input_values)})'
-
-    # Run the SQL
     try:
-        result = connect.execute(sql, input_values)
-        return result
+        with closing(get_connection()) as connect, connect:
+            table_exists = connect.execute(
+                "SELECT 1 FROM sqlite_master WHERE type='table' AND name=?",
+                (table,),
+            ).fetchone()
+            if not table_exists or table.lower().startswith("sqlite_"):
+                print("Table not found")
+                return 1
+
+            columns = connect.execute(
+                "SELECT name, type, [notnull], dflt_value, pk FROM pragma_table_info(?)",
+                (table,),
+            ).fetchall()
+            column_names = {column["name"] for column in columns}
+            unknown_keys = json.keys() - column_names
+            if unknown_keys:
+                print(f"Invalid keys: {', '.join(sorted(unknown_keys))}")
+                return 1
+
+            indexes = connect.execute(
+                "SELECT origin FROM pragma_index_list(?)", (table,)
+            ).fetchall()
+            has_primary_key_index = any(index["origin"] == "pk" for index in indexes)
+            for column in columns:
+                is_primary_key = column["pk"] > 0
+                is_generated_key = (
+                    is_primary_key
+                    and column["type"].upper() == "INTEGER"
+                    and not has_primary_key_index
+                )
+                is_required = is_primary_key or (
+                    column["notnull"] and column["dflt_value"] is None
+                )
+                if is_required and not is_generated_key and column["name"] not in json:
+                    print(f"Missing a required key: {column['name']}")
+                    return 1
+
+            quoted_table = '"' + table.replace('"', '""') + '"'
+            quoted_columns = ['"' + key.replace('"', '""') + '"' for key in json]
+            placeholders = ", ".join("?" for _ in json)
+            sql = f"INSERT INTO {quoted_table} ({', '.join(quoted_columns)}) VALUES ({placeholders})"
+            cursor = connect.execute(sql, tuple(json.values()))
+            return {"rowsInserted": cursor.rowcount}
     except sqlite3.IntegrityError as error:
         print(f"Database constraint error: {error}")
         return 1
     except sqlite3.Error as error:
         print(f"Database error: {error}")
         return 1
-    finally:
-        connect.close()
 
 def delete_record(table, json):
 
