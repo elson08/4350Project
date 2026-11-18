@@ -1,11 +1,10 @@
 import { useState } from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Home from "./Pages/Home.jsx";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import Login from "./Pages/Login.jsx";
+import PageLayout from "./components/PageLayout.jsx";
 import "./App.css";
 
 import {
-    StoreSelection,
-    Login,
     CustomerRegister,
     EmployeeRegister,
     PartsCatalog,
@@ -21,26 +20,14 @@ function App() {
 
     return (
         <BrowserRouter>
-            <main>
+            <PageLayout>
                 <Routes>
-                    {/* Main Home Page */}
-                    <Route path="/" element={<Home />} />
+                    <Route path="/" element={<Navigate to="/login" replace />} />
 
-                    {/* Store Selection and Shared Login */}
-                    <Route
-                        path="/stores"
-                        element={
-                            <StoreSelection
-                                setSelectedStore={setSelectedStore}
-                            />
-                        }
-                    />
-
+                    <Route path="/stores" element={<Navigate to="/login" replace />} />
                     <Route
                         path="/login"
-                        element={
-                            <Login selectedStore={selectedStore} />
-                        }
+                        element={<Login selectedStore={selectedStore} setSelectedStore={setSelectedStore} />}
                     />
 
                     {/* Registration */}
@@ -69,16 +56,6 @@ function App() {
                         element={<Suppliers selectedStore={selectedStore} />}
                     />
                     <Route
-                        path="/stores"
-                        element={<StoreSelection setSelectedStore={setSelectedStore} />}
-                    />
-
-                    <Route
-                        path="/login"
-                        element={<Login selectedStore={selectedStore} />}
-                    />
-
-                    <Route
                         path="/register/customer"
                         element={<CustomerRegister />}
                     />
@@ -88,7 +65,7 @@ function App() {
                         element={<EmployeeRegister selectedStore={selectedStore} />}
                     />
                 </Routes>
-            </main>
+            </PageLayout>
         </BrowserRouter>
     );
 }
