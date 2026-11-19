@@ -1,0 +1,90 @@
+.suppliers {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.suppliers-columns {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 1.5rem;
+}
+
+.suppliers-list {
+    flex: 999 1 640px;
+    min-width: 0;
+}
+
+.suppliers-empty {
+    padding: 1.5rem;
+}
+
+.suppliers-actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+}
+
+.suppliers-items-row > td {
+    padding: 0 0.75rem 1rem;
+    background: var(--bg);
+}
+
+.suppliers-items {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+
+    td,
+    th {
+        padding: 0.5rem 0.75rem;
+    }
+
+    tbody tr:last-child td {
+        border-bottom: none;
+    }
+}
+
+.suppliers-form {
+    flex: 1 1 320px;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1.25rem;
+
+    h2 {
+        font-size: 1.125rem;
+    }
+}
+
+.suppliers-line {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 0.75rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+
+    .field {
+        flex: 1 1 80px;
+        min-width: 0;
+    }
+
+    input,
+    select {
+        width: 100%;
+    }
+}
+
+.suppliers-line .suppliers-line-part {
+    flex: 1 1 100%;
+}
+
+.suppliers-total {
+    display: flex;
+    justify-content: space-between;
+    padding-top: 0.75rem;
+    font-weight: 700;
+    border-top: 1px solid var(--border);
+}

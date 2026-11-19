@@ -1,0 +1,36 @@
+.orders {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.orders-empty {
+    max-width: 480px;
+    padding: 1.5rem;
+}
+
+.orders-actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+}
+
+.orders-items-row > td {
+    padding: 0 0.75rem 1rem;
+    background: var(--bg);
+}
+
+.orders-items {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+
+    td,
+    th {
+        padding: 0.5rem 0.75rem;
+    }
+
+    tbody tr:last-child td {
+        border-bottom: none;
+    }
+}

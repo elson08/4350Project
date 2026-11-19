@@ -1,0 +1,43 @@
+.manage {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.manage-filters {
+    padding: 1rem;
+
+    .field {
+        max-width: 240px;
+    }
+}
+
+.manage-empty {
+    padding: 1.5rem;
+}
+
+.manage-actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+}
+
+.manage-items-row > td {
+    padding: 0 0.75rem 1rem;
+    background: var(--bg);
+}
+
+.manage-items {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+
+    td,
+    th {
+        padding: 0.5rem 0.75rem;
+    }
+
+    tbody tr:last-child td {
+        border-bottom: none;
+    }
+}
